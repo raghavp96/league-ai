@@ -12,9 +12,8 @@ import numpy
 
 # Build the model
 model = keras.Sequential([
-    # keras.layers.Flatten(input_shape=train_data.shape), # no need to flatten, since we have 2d array
     keras.layers.Dense(128, activation=tf.nn.relu),
-    keras.layers.Dense(10, activation=tf.nn.softmax)
+    keras.layers.Dense(10, activation=tf.nn.relu)
 ])
 
 model.compile(optimizer='adam',
