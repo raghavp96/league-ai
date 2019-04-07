@@ -12,14 +12,14 @@ ml_models = models.get_models()
 print("Training all models")
 for model in ml_models:
     print("Training the model")
-    model.fit(train_data, train_labels, epochs=10)
+    model["Model"].fit(train_data, train_labels, epochs=10)
     print("Trained")
 print("Training completed.")
 
 # Test the model
 print("Testing all models")
 for model in ml_models:
-    test_loss, test_acc = model.evaluate(test_data, test_labels)
+    test_loss, test_acc = model["Model"].evaluate(test_data, test_labels)
     print('Model Test accuracy:', test_acc)
 print("All models tested.")
 
