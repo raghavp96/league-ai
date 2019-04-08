@@ -107,6 +107,69 @@ ml_models_metadata = [
             'Optimizer': 'nadam',
             'Loss': 'binary_crossentropy',
             'Metrics': ['accuracy']
+        },
+        {
+            'Name': 'NeuralNet with 10 Layers (10 relu per layer) and NADAM optimizer',
+            'Type': 'NeuralNet',
+            'Layers': [
+                {
+                    'HiddenLayer': 1,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 2,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 3,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 4,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 5,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 6,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 7,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 8,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 9,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 10,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'NumberOfNodes': 1,
+                    'ActivationFunction': tf.nn.sigmoid
+                }
+            ],
+            'Optimizer': 'nadam',
+            'Loss': 'binary_crossentropy',
+            'Metrics': ['accuracy']
         }
     ]
 
