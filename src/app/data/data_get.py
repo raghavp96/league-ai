@@ -16,7 +16,7 @@ def get_lcs_data(preparation_method="random"):
         return __split_data_random(data)
     # "Fixed" means we will use the 2017-2018 data as the training data, and 2019 data as the test data
     elif preparation_method == "fixed":
-        training_df == __preprocess_dataframe(__get_lcs_dataframe(ignore=[spring_2019_match_data_file]))
+        training_df = __preprocess_dataframe(__get_lcs_dataframe(ignore=[spring_2019_match_data_file]))
         test_df = __preprocess_dataframe(pandas.read_csv(spring_2019_match_data_file))
         return __split_df_and_label(training_df), __split_df_and_label(test_df)
     else:
