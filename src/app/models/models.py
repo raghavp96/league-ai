@@ -7,17 +7,17 @@ from tensorflow import keras
 # An config for different ML Models
 ml_models_metadata = [
         {
-            'Name': 'NeuralNet with 2 Layers (128, 10 nodes each) and Adam optimizer',
+            'Name': 'NeuralNet with 2 Layers (4, 2 nodes each) and Adam optimizer',
             'Type': 'NeuralNet',
             'Layers': [
                 {
                     'HiddenLayer': 1,
-                    'NumberOfNodes': 128,
+                    'NumberOfNodes': 4,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 2,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
@@ -30,17 +30,17 @@ ml_models_metadata = [
             'Metrics': ['accuracy']
         },
         {
-            'Name': 'NeuralNet with 2 Layers (128, 10 nodes each) and NADAM optimizer',
+            'Name': 'NeuralNet with 2 Layers (4, 2 nodes each) and NADAM optimizer',
             'Type': 'NeuralNet',
             'Layers': [
                 {
                     'HiddenLayer': 1,
-                    'NumberOfNodes': 128,
+                    'NumberOfNodes': 4,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 2,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
@@ -53,22 +53,22 @@ ml_models_metadata = [
             'Metrics': ['accuracy']
         },
         {
-            'Name': 'NeuralNet with 3 Layers (128 relu, 10 relu, 10 relu nodes each) and Adam optimizer',
+            'Name': 'NeuralNet with 3 Layers (4 relu, 2 relu, 2 relu nodes each) and Adam optimizer',
             'Type': 'NeuralNet',
             'Layers': [
                 {
                     'HiddenLayer': 1,
-                    'NumberOfNodes': 128,
+                    'NumberOfNodes': 4,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 2,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 2,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
@@ -81,22 +81,22 @@ ml_models_metadata = [
             'Metrics': ['accuracy']
         },
         {
-            'Name': 'NeuralNet with 3 Layers (128 relu, 10 relu, 10 relu nodes each) and NADAM optimizer',
+            'Name': 'NeuralNet with 3 Layers (4 relu, 2 relu, 2 relu nodes each) and NADAM optimizer',
             'Type': 'NeuralNet',
             'Layers': [
                 {
                     'HiddenLayer': 1,
-                    'NumberOfNodes': 128,
+                    'NumberOfNodes': 4,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 2,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 3,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
@@ -109,57 +109,120 @@ ml_models_metadata = [
             'Metrics': ['accuracy']
         },
         {
-            'Name': 'NeuralNet with 10 Layers (10 relu per layer) and NADAM optimizer',
+            'Name': 'NeuralNet with 10 Layers (4 or 2 relu per layer) and NADAM optimizer',
             'Type': 'NeuralNet',
             'Layers': [
                 {
                     'HiddenLayer': 1,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 4,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 2,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 3,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 4,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 4,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 5,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 4,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 6,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 7,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 4,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 8,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 9,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 4,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
                     'HiddenLayer': 10,
-                    'NumberOfNodes': 10,
+                    'NumberOfNodes': 2,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'NumberOfNodes': 1,
+                    'ActivationFunction': tf.nn.sigmoid
+                }
+            ],
+            'Optimizer': 'nadam',
+            'Loss': 'binary_crossentropy',
+            'Metrics': ['accuracy']
+        },
+        {
+            'Name': 'NeuralNet with 10 Layers (4 relu per layer) and NADAM optimizer',
+            'Type': 'NeuralNet',
+            'Layers': [
+                {
+                    'HiddenLayer': 1,
+                    'NumberOfNodes': 4,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 2,
+                    'NumberOfNodes': 4,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 3,
+                    'NumberOfNodes': 4,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 4,
+                    'NumberOfNodes': 4,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 5,
+                    'NumberOfNodes': 4,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 6,
+                    'NumberOfNodes': 4,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 7,
+                    'NumberOfNodes': 4,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 8,
+                    'NumberOfNodes': 4,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 9,
+                    'NumberOfNodes': 4,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 10,
+                    'NumberOfNodes': 4,
                     'ActivationFunction': tf.nn.relu
                 },
                 {
