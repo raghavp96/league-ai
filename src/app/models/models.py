@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function
 import tensorflow as tf
 from tensorflow import keras
 
-
+# An config for different ML Models
 ml_models_metadata = [
         {
             'Name': 'NeuralNet with 2 Layers (128, 10 nodes each) and Adam optimizer',
@@ -51,6 +51,10 @@ ml_models_metadata = [
         }
     ]
 
+"""
+Gets all the ML Model meta data needed to construct the models, constructs the appropriate ML model, and adds it as part of the 
+metadata array. Returns this list of ml model metadata that now has the compiled ML models as well
+"""
 def get_ml_models():
     built_models = __get_ml_model_details()
     for model_detail in built_models:
