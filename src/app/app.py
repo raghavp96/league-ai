@@ -1,27 +1,29 @@
 import data
-# import numpy
 import models
 
 # Get training data/labels, test data/labels from data as numpy arrays
 ((train_data, train_labels), (test_data, test_labels)) = data.get_data()
 
 # Get the models
-ml_models = models.get_models()
+model_metadata = models.get_models()
 
 # Train each model
-print("Training all models")
-for model in ml_models:
-    print("Training the model")
+for model in model_metadata:
     model["Model"].fit(train_data, train_labels, epochs=10)
-    print("Trained")
-print("Training completed.")
+
+max_acc = float("-inf")
+max_name = ""
+max_loss = float("-inf")
 
 # Test the model
-print("Testing all models")
-for model in ml_models:
+for model in model_metadata:
     test_loss, test_acc = model["Model"].evaluate(test_data, test_labels)
-    print('Model Test accuracy:', test_acc)
-print("All models tested.")
+    if (max_acc < test_acc):
+        max_acc = test_acc
+        max_loss = test_loss
+        max_name = model['Name']
+
+print("Best Model's Results - Model Name: " + max_name + ", Accuracy: " + str(max_acc) + ", Loss: " + str(max_loss))
 
 # predictions = model.predict(test_data)
 
