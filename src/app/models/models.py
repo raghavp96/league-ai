@@ -19,14 +19,69 @@ ml_models_metadata = [
                     'HiddenLayer': 2,
                     'NumberOfNodes': 10,
                     'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'NumberOfNodes': 1,
+                    'ActivationFunction': tf.nn.sigmoid
                 }
             ],
             'Optimizer': 'adam',
-            'Loss': 'sparse_categorical_crossentropy',
+            'Loss': 'binary_crossentropy',
             'Metrics': ['accuracy']
         },
         {
-            'Name': 'NeuralNet with 3 Layers (128 relu, 10 relu, 10 sigmoid nodes each) and NADAM optimizer',
+            'Name': 'NeuralNet with 2 Layers (128, 10 nodes each) and NADAM optimizer',
+            'Type': 'NeuralNet',
+            'Layers': [
+                {
+                    'HiddenLayer': 1,
+                    'NumberOfNodes': 128,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 2,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'NumberOfNodes': 1,
+                    'ActivationFunction': tf.nn.sigmoid
+                }
+            ],
+            'Optimizer': 'nadam',
+            'Loss': 'binary_crossentropy',
+            'Metrics': ['accuracy']
+        },
+        {
+            'Name': 'NeuralNet with 3 Layers (128 relu, 10 relu, 10 relu nodes each) and Adam optimizer',
+            'Type': 'NeuralNet',
+            'Layers': [
+                {
+                    'HiddenLayer': 1,
+                    'NumberOfNodes': 128,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 2,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'HiddenLayer': 2,
+                    'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'NumberOfNodes': 1,
+                    'ActivationFunction': tf.nn.sigmoid
+                }
+            ],
+            'Optimizer': 'adam',
+            'Loss': 'binary_crossentropy',
+            'Metrics': ['accuracy']
+        },
+        {
+            'Name': 'NeuralNet with 3 Layers (128 relu, 10 relu, 10 relu nodes each) and NADAM optimizer',
             'Type': 'NeuralNet',
             'Layers': [
                 {
@@ -42,11 +97,15 @@ ml_models_metadata = [
                 {
                     'HiddenLayer': 3,
                     'NumberOfNodes': 10,
+                    'ActivationFunction': tf.nn.relu
+                },
+                {
+                    'NumberOfNodes': 1,
                     'ActivationFunction': tf.nn.sigmoid
                 }
             ],
             'Optimizer': 'nadam',
-            'Loss': 'sparse_categorical_crossentropy',
+            'Loss': 'binary_crossentropy',
             'Metrics': ['accuracy']
         }
     ]

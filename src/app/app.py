@@ -2,6 +2,7 @@ import data
 import models
 import sys
 
+
 def __run(method):
     # Get training data/labels, test data/labels from data as numpy arrays
     ((train_data, train_labels), (test_data, test_labels)) = data.get_data(method)
@@ -25,12 +26,19 @@ def __run(method):
             max_loss = test_loss
             max_name = model['Name']
 
+    # model_weights_per_layer = []
+    # for model in model_metadata:
+    #     model_weights = {}
+    #     model_weights["Name"] = model["Name"]
+    #     model_weights["Layers"] = {}
+    #     for (idx, layer) in model["Model"].layers:
+    #         model_weights["Layers"]["idx"] = layer.get_weights()
+
+    # print(model_weights_per_layer)
+
     print("Best Model's Results - Model Name: " + max_name + ", Accuracy: " + str(max_acc) + ", Loss: " + str(max_loss))
+    print("Best Model Details: " + str([model["Model"].summary() for model in model_metadata if model["Name"] == max_name]) )
 
-# predictions = model.predict(test_data)
-
-# print(numpy.argmax(predictions[0]))
-# print(test_labels[0])
 
 if __name__ == "__main__":
     method_mentioned = False
