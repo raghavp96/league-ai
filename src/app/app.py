@@ -49,3 +49,4 @@ if __name__ == "__main__":
                 __run(arg)
     if not method_mentioned:
         __run("random")
+        

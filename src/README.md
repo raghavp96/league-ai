@@ -29,7 +29,8 @@ is stored in its own CSV file.
         - reads all the CSVs and merges them together
         - filter data:
             - only keeps rows pertaining to teams (not individual players)
-            - only keeps the columns "side", "gdat10", "xpdat10", "gdat15", "fb", "firsttothreetowers", "result"
+            - only keeps the columns "side", "goldat15", "totalgold", "gdat10", "xpdat10", "gdat15", "fb", "firsttothreetowers", "result"
+            - 
             - replaced Map Side "Red" and "Blue" as numbers 2 and 1
             - ignores rows with null values for certain stats        
         - splits the data randomly into two sets:

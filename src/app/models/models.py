@@ -1,5 +1,12 @@
 from __future__ import absolute_import, division, print_function
 
+# To make sure the same randomness is used for feature  in the hidden layers
+# From: https://machinelearningmastery.com/reproducible-results-neural-networks-keras/
+from numpy.random import seed
+seed(1)
+from tensorflow import set_random_seed
+set_random_seed(2)
+
 # TensorFlow and tf.keras
 import tensorflow as tf
 from tensorflow import keras
@@ -235,6 +242,7 @@ ml_models_metadata = [
             'Metrics': ['accuracy']
         }
     ]
+
 
 """
 Gets all the ML Model meta data needed to construct the models, constructs the appropriate ML model, and adds it as part of the 

@@ -22,6 +22,7 @@ def get_lcs_data(preparation_method="random"):
     else:
         return None
 
+
 """
 Filters and cleans the data and returns a dataframe.
 """
@@ -31,7 +32,9 @@ def __preprocess_dataframe(df=None):
         df.loc[df['position'] == 'Team']
 
         # Filters, only keeping these features
-        df = df.filter(["side", "gdat10", "xpdat10", "gdat15", "fb", "firsttothreetowers", "result"])
+        df = df.filter(["side", "gdat10", "goldat15", "gdat15", "totalgold", "xpdat10", "fb", "firsttothreetowers", "result"])
+        df["goldafter15"] = df["totalgold"] - df["goldat15"]
+        df.drop(["goldat15", "totalgold"], axis=1, inplace=True)
 
         # Turn red and blue (side) into numbers -> Red=2 Blue=1
         df.replace(to_replace=["Blue", "Red"], value=[1, 2], inplace=True)
@@ -42,7 +45,6 @@ def __preprocess_dataframe(df=None):
             df = df.loc[~df[column].isnull()]
 
     return df
-
 
 
 """ 
