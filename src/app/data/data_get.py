@@ -1,12 +1,14 @@
 import pandas
 import numpy
+import os
+dirname = os.path.dirname(os.path.abspath(__file__))
 
 
-all_2017_match_data_file = 'data/2017-match-data.csv'
-spring_2018_match_data_file = 'data/2018-spring-match-data.csv'
-summer_2018_match_data_file = 'data/2018-summer-match-data.csv'
-worlds_2018_match_data_file = 'data/2018-worlds-match-data.csv'
-spring_2019_match_data_file = 'data/2019-spring-match-data.csv'
+all_2017_match_data_file = dirname + '/2017-match-data.csv'
+spring_2018_match_data_file = dirname + '/2018-spring-match-data.csv'
+summer_2018_match_data_file = dirname + '/2018-summer-match-data.csv'
+worlds_2018_match_data_file = dirname + '/2018-worlds-match-data.csv'
+spring_2019_match_data_file = dirname + '/2019-spring-match-data.csv'
 
 default_feature_set = ["side", "gdat10", "gdat15", "xpdat10", "fb", "firsttothreetowers", "result"]
 post_15_feature_set = ["goldat15", "totalgold"]
