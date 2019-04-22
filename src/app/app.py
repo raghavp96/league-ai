@@ -1,33 +1,59 @@
 import data
 import models
 import sys
+import results as rs_write
 
 
 def __run(method, onlyUseBasicFeatures):
     # Get training data/labels, test data/labels from data as numpy arrays
-    ((train_data, train_labels), (test_data, test_labels)) = data.get_data(preparation_method=method, onlyUseBasicFeatures=onlyUseBasicFeatures)
+    ((train_data, train_labels), (test_data, test_labels), (dev_data, dev_labels)) = data.get_data(preparation_method=method, onlyUseBasicFeatures=onlyUseBasicFeatures)
 
-    # Get the models
-    model_metadata = models.get_models()
+    epochs = [1]
+    results = {}
 
-    # Train each model
-    for model in model_metadata:
-        model["Model"].fit(train_data, train_labels, epochs=model["Epochs"])
+    for epoch in epochs:
+        # Get the models
+        model_metadata = models.get_models()
 
-    max_acc = float("-inf")
-    max_name = ""
-    max_loss = float("-inf")
+        # Train each model
+        for model in model_metadata:
+            model["Model"].fit(train_data, train_labels, epochs=epoch)
 
-    # Test the model
-    for model in model_metadata:
-        test_loss, test_acc = model["Model"].evaluate(test_data, test_labels)
-        if (max_acc < test_acc):
-            max_acc = test_acc
-            max_loss = test_loss
-            max_name = model['Name']
+        max_acc = float("-inf")
+        max_name = ""
+        max_loss = float("-inf")
 
-    print("Best Model's Results - Model Name: " + max_name + ", Accuracy: " + str(max_acc) + ", Loss: " + str(max_loss))
-    print("Best Model Details: " + str([model["Model"].summary() for model in model_metadata if model["Name"] == max_name]) )
+        # Test the model with development data
+        for model in model_metadata:
+            test_loss, test_acc = model["Model"].evaluate(dev_data, dev_labels)
+            # if (max_acc < test_acc):
+            #     max_acc = test_acc
+            #     max_loss = test_loss
+            #     max_name = model['Name']
+
+            resultForThisEpoch = {
+                "Epoch" : epoch,
+                "Accuracy" : test_acc,
+                "Loss" : test_loss
+            }
+
+            if model["Name"] not in results:
+                results[model["Name"]] = [resultForThisEpoch]
+            else:
+                results[model["Name"]].append(resultForThisEpoch)
+
+
+        # best_models = [model["Model"] for model in model_metadata if model["Name"] == max_name]
+        # best_model = best_models[0]
+
+        # print("Best Model's Results - Model Name: " + max_name + ", Accuracy: " + str(max_acc) + ", Loss: " + str(max_loss))
+        # print("Best Model Details: " + str([model["Model"].summary() for model in model_metadata if model["Name"] == max_name]))
+
+        # Run the model on the test data
+        # predictions = best_model.predict(test_data)
+        # for i in range(len(predictions)):
+        #     print("Predicted: " + predictions[i] + " Actual: " + test_labels[i])
+    rs_write.writeDict(results)
 
 
 if __name__ == "__main__":
