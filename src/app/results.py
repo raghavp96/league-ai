@@ -4,14 +4,23 @@ dirname = os.path.dirname(os.path.abspath(__file__))
 
 results_file = dirname + '/results.csv'
 
-def writeDict(resultDict={}):
+def writeDict(resultDict={}, epochs=[]):
     rows = []
-    rows.append(["Model Name", "Epoch", "Accuracy"])
+
+    header = ["Model Name"]
+    for epoch in epochs:
+        header.append("After " + str(epoch) + " epochs")
+    rows.append(header)
+
     for modelName in resultDict:
+        row = [modelName]
         for result in resultDict[modelName]:
-            rows.append([modelName, result["Epoch"], result["Accuracy"]])
+            row.append(result["Accuracy"])
+        rows.append(row)
+
     write(rows=rows)
 
+# https://www.programiz.com/python-programming/working-csv-files#existing-files
 def write(rows=[]):
     with open(results_file, 'w+') as writeFile:
         writer = csv.writer(writeFile)
