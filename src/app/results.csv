@@ -1,0 +1,10 @@
+Model Name,After 10 epochs,After 50 epochs,After 100 epochs
+NeuralNet with 1 Layers (4 relu nodes) and Adam optimizer,0.69841444,0.7638346,0.76361257
+"NeuralNet with 2 Layers (4, 2 nodes each) and Adam optimizer",0.76612186,0.50230944,0.7488897
+"NeuralNet with 2 Layers (4, 2 nodes each) and NADAM optimizer",0.76647717,0.49769053,0.76478946
+"NeuralNet with 3 Layers (4 relu, 2 relu, 2 relu nodes each) and Adam optimizer",0.76434535,0.74666905,0.49769053
+"NeuralNet with 3 Layers (4 relu, 2 relu, 2 relu nodes each) and NADAM optimizer",0.7606147,0.7598152,0.74338245
+"NeuralNet with 2 Layers (4, 2 nodes each) and Adam optimizer and increasing dropout layers",0.76470065,0.76354593,0.72543967
+"NeuralNet with 2 Layers (4, 2 nodes each) and NADAM optimizer and increasing dropout layers",0.7514656,0.7672766,0.7291704
+"NeuralNet with 3 Layers (4 relu, 2 relu, 2 relu nodes each) and Adam optimizer and increasing dropout layers",0.7607923,0.7641677,0.76434535
+"NeuralNet with 3 Layers (4 relu, 2 relu, 2 relu nodes each) and NADAM optimizer and increasing dropout layers",0.76514477,0.50230944,0.76629955

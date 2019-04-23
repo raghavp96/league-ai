@@ -8,7 +8,7 @@ def __run(method, onlyUseBasicFeatures):
     # Get training data/labels, test data/labels, development data/labels from data as numpy arrays
     ((train_data, train_labels), (test_data, test_labels), (dev_data, dev_labels)) = data.get_data(preparation_method=method, onlyUseBasicFeatures=onlyUseBasicFeatures)
 
-    epochs = [1, 2]
+    epochs = [10, 50, 100]
     results = {}
 
     for epoch in epochs:
