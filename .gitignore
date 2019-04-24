@@ -1,4 +1,3 @@
-*.xlsx
 *.pyc
 *.idea
 __pycache__
