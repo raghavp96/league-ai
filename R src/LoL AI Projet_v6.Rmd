@@ -1,0 +1,462 @@
+---
+title: "LoL AI Project"
+author: "Amel"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning= FALSE,
+                      cache = TRUE)
+library(tidyverse)
+library(readxl)
+library(modelr)
+library(purrr)
+library(randomForest)
+library(tree)
+library(glmnet)
+```
+
+Steps:
+  
+  1. Fetch the data sets. 
+  2. Inspect and Clean them.
+  3. EDA
+  4. Train models
+  5. Evaluate each model performance using the development set
+
+```{r}
+lol2019spr <- read_xlsx("C:/Users/Lenovo/Desktop/all in one/amel/grad studies/Northeastern University/Data Science/Spring 2019/CS 5100 Foundations of AI/project/lol/2019-spring-match-data-OraclesElixir-2019-03-27.xlsx")
+lol2018wrld <- read_xlsx("C:/Users/Lenovo/Desktop/all in one/amel/grad studies/Northeastern University/Data Science/Spring 2019/CS 5100 Foundations of AI/project/lol/2018-worlds-match-data-OraclesElixir-2018-11-03.xlsx")
+lol2018spr <- read_xlsx("C:/Users/Lenovo/Desktop/all in one/amel/grad studies/Northeastern University/Data Science/Spring 2019/CS 5100 Foundations of AI/project/lol/2018-spring-match-data-OraclesElixir-2018-05-20.xlsx")
+lol2018sum <- read_xlsx("C:/Users/Lenovo/Desktop/all in one/amel/grad studies/Northeastern University/Data Science/Spring 2019/CS 5100 Foundations of AI/project/lol/2018 summer match data OraclesElixir 2018-09-27.xlsx")
+lol2017 <- read_xlsx("C:/Users/Lenovo/Desktop/all in one/amel/grad studies/Northeastern University/Data Science/Spring 2019/CS 5100 Foundations of AI/project/lol/2017matchdataOraclesElixir.xlsx")
+#lol2016 <- read_xlsx("C:/Users/Lenovo/Desktop/all in one/amel/grad studies/Northeastern University/Data Science/Spring 2019/CS 5100 Foundations of AI/project/lol/2016 complete match data OraclesElixir 2018-12-18.xlsx")
+```
+
+```{r, eval=FALSE}
+overview <- function(data) {
+  str(data)
+  #summary(data)
+}
+  
+```
+
+```{r, eval=FALSE}
+plot <- function(data) {
+  for(var in names(data)) {
+    if(is.numeric(data[[var]])==TRUE) {
+      ggplot(data, aes_string(x=var)) + geom_histogram()
+    }
+    else {
+      ggplot(data, aes_string(x=var)) + geom_bar()
+    }
+  }
+}
+```
+
+```{r, eval=FALSE}
+overview(lol2019spr)
+```
+
+```{r, eval=FALSE}
+lol2019spr <- lol2019spr %>% mutate(result = ifelse(result==1, 1, 0))
+lol2019spr %>% group_by(result) %>% count()
+ggplot(data=lol2019spr, aes(x=teamkills, y=totalgold, color=result==1)) + geom_jitter(alpha = 0.2)
+```
+
+#Transform the data set
+We shall set 80% from the 2017 and 2018 match data sets as the training set, the other 20% as the development set; while, the 2019 match data as the test set. Furthermore, we shall include in our analysis only those complete cases, (i.e., observations without missing values.
+
+```{r Train and Test Sets}
+#LOL 2017 and 2018 data for training and dev sets
+lol_data <- rbind(lol2017, lol2018spr, lol2018sum, lol2018wrld)
+
+#Test set
+lol_test <- lol2019spr
+
+remove(lol2017, lol2018spr, lol2018sum, lol2018wrld, lol2019spr)
+
+
+#Note, we are excluding the LOL 2016 data set because of missing variables
+```
+
+  
+```{r Unique game ids}
+#We shall filter out non-unique gameids in some leagues
+lol_transform <- lol_data %>% filter(!(is.na(gameid) & league=="LPL"), 
+                                     !(gameid=="1002620109" & league=="NALCS"),
+                                      !(gameid=="770284" & league=="TCL")) %>%
+  filter(position=="Team") #We shall do team analysis
+
+#We shall extract the total gold earned from each game post the 15 min mark, 
+#and then join it with the dataset again to extract gold difference post 15 mins.
+#This will be our mid to late game gold difference.
+summaries <- lol_transform %>% group_by(gameid, league) %>% 
+  mutate(goldpost15 = totalgold - goldat15) %>% summarize(lategold = sum(goldpost15))
+  
+lol_transform <- lol_transform %>% left_join(summaries, by = c("gameid", "league")) %>%  
+  mutate(redside = ifelse(side=="Red", 1, 0),
+         #subtract gold for destroying the Nexus from the winning team
+         totalgold = ifelse(result==1, totalgold-250, totalgold),
+         tgoldpost15 = totalgold - goldat15, #team gold post 15 mins
+         oppgoldpost15 = lategold - tgoldpost15, #opp gold post 15 mins,
+         dgoldpost15 = tgoldpost15 - oppgoldpost15, #gold diff post 15 mins against opponents
+         pgoldpost15 = tgoldpost15/oppgoldpost15, #ratio gold post 15 mins against opponent
+         plategold = tgoldpost15/lategold, #percent of total gold earned in the late game
+         pxplead10 = ifelse(xpat10>oppxpat10, (xpat10-oppxpat10)/oppxpat10, 0),
+         pgoldlead15 = ifelse(goldat15>oppgoldat15, (goldat15-oppgoldat15)/oppgoldat15, 0),
+         pgoldleadpost15 = ifelse(tgoldpost15>oppgoldpost15,
+                                  (tgoldpost15-oppgoldpost15)/oppgoldpost15, 0)) %>%
+  select(result, redside, gdat10, xpdat10, gdat15,
+         cspm, k, d, a, fb, earnedgpm, dmgtochampsperminute,
+         firsttothreetowers, wpm, teambaronkills, teamdragkills,
+         pgoldpost15, pxplead10, pgoldlead15, pgoldleadpost15)
+
+#We shall include only those with complete cases (no missing values)
+lol_transform <- lol_transform %>% mutate(complete = complete.cases(lol_transform)) %>%
+  filter(complete==TRUE) %>% select(-complete)
+remove(summaries)
+```
+
+```{r}
+#Resample into Train (80%) and Dev (20%)
+set.seed(1)
+lol_resample <- lol_transform %>%
+  resample_partition(c(train = 0.8, dev = 0.2))
+lol_train <- as.tibble(lol_resample$train)
+lol_dev <- as.tibble(lol_resample$dev)
+```
+
+
+```{r}
+nrow(lol_train) #Entire training set
+nrow(lol_dev) #Entire dev set
+```
+
+#Classification Models
+##Logistic Regression
+
+Logistic regression function
+```{r Logit}
+logit <- function(formula, data) {
+  fit <- glm(formula, family = binomial(link = "logit"), data = data)
+  print(summary(fit))
+  return(fit)
+}
+
+```
+
+```{r}
+formula1 <- result ~ redside + fb + xpdat10 + gdat15 + firsttothreetowers + teambaronkills + teamdragkills
+fitlogit1 <- logit(formula1, lol_train)
+```
+
+```{r}
+as.tibble(fitlogit1$coefficients) %>%
+            mutate(vars = names(fitlogit1$coefficients)) %>%
+  select(vars, value) %>%
+  write_csv("C:/Users/Lenovo/Desktop/fitlogit1.csv", append=TRUE)
+```
+
+
+```{r}
+formula2 <- result ~ redside + fb + pxplead10 + pgoldlead15 + firsttothreetowers + teambaronkills + teamdragkills
+fitlogit2 <- logit(formula2, lol_train)
+```
+
+```{r}
+as.tibble(fitlogit2$coefficients) %>%
+            mutate(vars = names(fitlogit2$coefficients)) %>%
+  select(vars, value) %>%
+  write_csv("C:/Users/Lenovo/Desktop/fitlogit2.csv", append = TRUE)
+```
+
+#Regularized Logistic Regression
+  We shall include a wider set of predictors in our model. Regularization works by shrinking the estimated parameters of the predictors; thereby, reducing the risk of multicollinearity and overfitting.
+
+##L2-penalty or Ridge regularization
+One method is ridge regularization. We shall pick a tuned lambda that penalizes the coefficients of the predictors. We do this by performing a 10-fold cross-validation of the training set over a range of lambdas. The lambda that has the lowest cross-valided misclassifcation error shall be our choice for lambda as we evaluate the model on the development set.
+
+```{r Training set with complete cases}
+#Training set with complete cases only
+comp_train <- lol_train %>% select(-gdat10, -xpdat10, -gdat15, -pgoldpost15, -earnedgpm,
+                                   -dmgtochampsperminute, -wpm)
+```
+
+```{r}
+summary(comp_train)
+```
+
+
+```{r}
+predictors_matrix <- comp_train %>% select(-result) %>% as.matrix()
+response_matrix <- comp_train %>% select(result) %>% as.matrix()
+lambdas <- 10^seq(from=-5, to=5, length.out = 100) #shirnkage parameters for tuning
+```
+
+
+```{r}
+set.seed(1234)
+
+#By default, cv.glmnet performs a 10-fold cross validation
+cv_ridge <- cv.glmnet(x=predictors_matrix, y=response_matrix, alpha=0, 
+                      family = "binomial", lambda=lambdas, 
+                      type.measure="class", standardize=TRUE)
+ridge <- tibble(lambda = cv_ridge$lambda,
+                mse_cv = cv_ridge$cvm) %>%
+  arrange(mse_cv)
+ridge <- ridge[1, ]
+print(paste("Tuned lambda: ", ridge[[1]], " CV MSE: ", ridge[[2]]))
+coef(cv_ridge, s="lambda.min")
+```
+  
+  The tuned lambda is `r ridge$lambda[1]` with a cross-valided MSE of `r ridge$mse_cv[1]`.
+
+##L1-penalty or Lasso Regularization
+Our third method is Lasso regularization. We aim to pick a lambda that has the minimum cross-valided MSE over some range of lambdas. Just as in ridge, we shall perform a 10-fold cross-validation.
+
+```{r}
+set.seed(1234)
+
+#By default, cv.glmnet performs a 10-fold cross validation
+cv_lasso <- cv.glmnet(x=predictors_matrix, y=response_matrix, alpha=1, 
+                      family = "binomial", lambda=lambdas, 
+                      type.measure="class", standardize=TRUE)
+lasso <- tibble(lambda = cv_lasso$lambda,
+                mse_cv = cv_lasso$cvm) %>%
+  arrange(mse_cv)
+lasso <- lasso[1, ]
+print(paste("Tuned lambda: ", lasso[[1]], " CV MSE: ", lasso[[2]]))
+coef(cv_lasso, s="lambda.min")
+```
+  
+  Our tuned paramater for Lasso is `r lasso$lambda[1]` with a cross-valided MSE, `r lasso$mse_cv[1]`.
+
+##Decision Tree
+
+```{r Single decision tree}
+fitdtree <- tree::tree(result ~ ., data = lol_train %>% 
+                         mutate(result = as.factor(result),
+                                redside = as.factor(redside),
+                                firsttothreetowers = as.factor(firsttothreetowers),
+                                fb = as.factor(fb)) %>% select(-pgoldpost15))
+summary(fitdtree)
+plot(fitdtree)
+text(fitdtree, pretty = 0)
+```
+
+We shall perform cross-validation and determine the node that has the lowest misclassification error. We shall then prune the tree for cost complexity.
+```{r}
+cv_fitdtree <- tree::cv.tree(fitdtree, FUN=prune.misclass)
+cv_fitdtree
+
+par(mfrow =c(1,2))
+plot(cv_fitdtree$size, cv_fitdtree$dev, type="b")
+plot(cv_fitdtree$k, cv_fitdtree$dev, type="b")
+```
+
+```{r}
+prune_fitdtree <- tree::prune.tree(fitdtree, best = 2)
+plot(prune_fitdtree )
+text(prune_fitdtree, pretty =0)
+```
+  
+
+##Ensemble Methods
+
+###1. Bootstraping
+```{r}
+set.seed (1)
+lolrbagging <- randomForest(result ~ .,
+                            data = lol_train %>% 
+                              mutate(result = as.factor(result),
+                                     redside = as.factor(redside),
+                                     fb = as.factor(fb),
+                                     firsttothreetowers = as.factor(firsttothreetowers)) %>%
+                              select(-pgoldleadpost15),
+                            mtry = ncol(comp_train %>% select(-result)),
+                            importance =TRUE, na.action = na.omit)
+lolrbagging
+```
+
+```{r}
+importance(lolrbagging)
+varImpPlot(lolrbagging)
+```
+
+###2. Random Forest
+```{r}
+set.seed (1)
+lolrforest <- randomForest::randomForest(result ~ ., data = lol_train  %>% 
+                              mutate(result = as.factor(result),
+                                     redside = as.factor(redside),
+                                     fb = as.factor(fb),
+                                     firsttothreetowers = as.factor(firsttothreetowers)) %>%
+                                select(-pgoldpost15, -gdat15, -xpdat10),
+                         importance =TRUE, na.action = na.omit)
+lolrforest
+```
+
+```{r}
+imptforest <- tibble(var = attr(importance(lolrforest), which = "dimnames")[[1]], 
+                gini = importance(lolrforest)[, 4]) %>% arrange(-gini)
+imptforest
+imptforest %>%  write_csv("C:/Users/Lenovo/Desktop/rforest.csv")
+```
+
+#Performance of the models on the Development set
+
+```{r Accuracy function}
+#Accuracy function
+accuracy <- function(data) {
+  accuracy <- data %>% 
+    mutate(correct = ifelse(result==pred, 1, 0)) %>% 
+    summarize(sum(correct)/n())
+  return(accuracy[[1]])
+}
+```
+
+##1. Accuracy of Logit on the dev set
+```{r}
+#Predictions of Logit model 1
+formula1
+dev_logit1 <- lol_dev %>% 
+  mutate(prob = predict(fitlogit1, newdata=lol_dev, type="response"),
+         pred = ifelse(prob>=0.5, 1, 0)
+  ) %>% select(result, pred)
+
+#Accuracy on Dev Set
+accuracy(dev_logit1)
+
+#Predictions of Logit model 2
+formula2
+dev_logit2 <- lol_dev %>% 
+  mutate(prob = predict(fitlogit2, newdata=lol_dev, type="response"),
+         pred = ifelse(prob>=0.5, 1, 0)
+  ) %>% select(result, pred)
+
+#Accuracy on Dev Set
+accuracy(dev_logit2)
+
+```
+
+
+##2. Accuracy of L1 (Lasso) Regularized Logit on the dev set
+```{r}
+#Predictions on Dev set
+x <- lol_dev %>% select(-result, -gdat10, -xpdat10, -gdat15, -pgoldpost15,
+                        -wpm, -dmgtochampsperminute, -earnedgpm) %>% 
+  as.matrix()
+pred_lasso <- predict(cv_lasso, s = "lambda.min",
+                          newx = x, type="class")
+dev_lasso <- lol_dev %>%
+  mutate(pred = as.numeric(pred_lasso)) %>% 
+  select(result, pred)
+remove(x, pred_lasso)
+```
+
+```{r}
+#Accuracy on Dev Set
+accuracy(dev_lasso)
+
+```
+
+##3. Accuracy of Decision tree on the dev set
+```{r}
+#Predictions on dev set
+pred_dtree <- as.tibble(predict(prune_fitdtree, newdata = (lol_dev) %>% 
+                         mutate(result = as.factor(result),
+                                redside = as.factor(redside),
+                                firsttothreetowers = as.factor(firsttothreetowers),
+                                fb = as.factor(fb))))
+dev_dtree <- lol_dev %>% mutate(
+  pred = ifelse(pred_dtree$`1`>pred_dtree$`0`, 1, 0)) %>%
+  select(result, pred)
+remove(pred_dtree)
+```
+
+```{r}
+#Accuracy on Dev Set
+accuracy(dev_dtree)
+
+```
+
+##4. Accuracy of Random Forest on the dev set
+```{r}
+#Predictions on dev set
+pred_rforest <- predict(lolrforest, 
+                                   newdata = lol_dev %>% mutate(result = as.factor(result),
+                                     redside = as.factor(redside),
+                                     fb = as.factor(fb),
+                                     firsttothreetowers = as.factor(firsttothreetowers)))
+dev_rforest <- lol_dev %>% 
+  mutate(pred = pred_rforest) %>%
+           select(result, pred)
+remove(pred_rforest)
+```
+
+```{r}
+#Accuracy on Dev Set
+accuracy(dev_rforest)
+```
+
+##Accuracy of the Random Forest on the Test Set
+```{r Unique game ids}
+#We shall filter out non-unique gameids in some leagues
+#lol_test2 <- lol_data %>% filter(!(is.na(gameid) & league=="LPL"), 
+#                                     !(gameid=="1002620109" & league=="NALCS"),
+#                                      !(gameid=="770284" & league=="TCL")) %>%
+#  filter(position=="Team") #We shall do team analysis
+
+#We shall extract the total gold earned from each game post the 15 min mark, 
+#and then join it with the dataset again to extract gold difference post 15 mins.
+#This will be our mid to late game gold difference.
+summaries <- lol_test %>% group_by(gameid, league) %>% 
+  mutate(goldpost15 = totalgold - goldat15) %>% summarize(lategold = sum(goldpost15))
+  
+lol_test2 <- lol_test %>% left_join(summaries, by = c("gameid", "league")) %>%  
+  mutate(redside = ifelse(side=="Red", 1, 0),
+         #subtract gold for destroying the Nexus from the winning team
+         totalgold = ifelse(result==1, totalgold-250, totalgold),
+         tgoldpost15 = totalgold - goldat15, #team gold post 15 mins
+         oppgoldpost15 = lategold - tgoldpost15, #opp gold post 15 mins,
+         dgoldpost15 = tgoldpost15 - oppgoldpost15, #gold diff post 15 mins against opponents
+         pgoldpost15 = tgoldpost15/oppgoldpost15, #ratio gold post 15 mins against opponent
+         plategold = tgoldpost15/lategold, #percent of total gold earned in the late game
+         pxplead10 = ifelse(xpat10>oppxpat10, (xpat10-oppxpat10)/oppxpat10, 0),
+         pgoldlead15 = ifelse(goldat15>oppgoldat15, (goldat15-oppgoldat15)/oppgoldat15, 0),
+         pgoldleadpost15 = ifelse(tgoldpost15>oppgoldpost15,
+                                  (tgoldpost15-oppgoldpost15)/oppgoldpost15, 0)) %>%
+  select(result, redside, gdat10, xpdat10, gdat15,
+         cspm, k, d, a, fb, earnedgpm, dmgtochampsperminute,
+         firsttothreetowers, wpm, teambaronkills, teamdragkills,
+         pgoldpost15, pxplead10, pgoldlead15, pgoldleadpost15)
+
+#We shall include only those with complete cases (no missing values)
+lol_test2 <- lol_test2 %>% mutate(complete = complete.cases(lol_test2)) %>%
+  filter(complete==TRUE) %>% select(-complete)
+remove(summaries)
+```
+
+```{r}
+#Predictions on test set
+pred_rforest <- predict(lolrforest, 
+                                   newdata = lol_test2 %>% mutate(result = as.factor(result),
+                                     redside = as.factor(redside),
+                                     fb = as.factor(fb),
+                                     firsttothreetowers = as.factor(firsttothreetowers)))
+test_rforest <- lol_test2 %>% 
+  mutate(pred = pred_rforest) %>%
+           select(result, pred)
+remove(pred_rforest)
+```
+
+```{r}
+#Accuracy on Test Set
+accuracy(test_rforest)
+```
+
+References:
+  
+  1. Anybody else feels like the side of the map matters? A LOL community forum. Retrieved online: https://boards.na.leagueoflegends.com/en/c/gameplay-balance/EiU910cH-anybody-else-feel-like-the-side-of-the-map-matters
